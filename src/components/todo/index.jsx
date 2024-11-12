@@ -2,39 +2,55 @@ import { v4 } from "uuid";
 import { FaListCheck } from "react-icons/fa6";
 import { IoIosAddCircle } from "react-icons/io";
 import TodoItem from "../todoItem";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 const Todo = () => {
-  // useState && useRef
-  const [todos, setTodos] = useState([]); // Başlangıç değeri olarak boş bir dizi verildi
+  const [todos, setTodos] = useState(
+    localStorage.getItem("todos")
+      ? JSON.parse(localStorage.getItem("todos"))
+      : []
+  );
   const inputRef = useRef();
 
-  // ! Add Todo Function
+  // Function that adds todo
   const addTodos = () => {
-    // İnputtaki değere eriş ve boşlukları kaldır
     const inputContent = inputRef.current.value.trim();
-
-    // input içeriğini kontrol et
     if (!inputContent) return;
 
-    // Todo objesi oluştur
     const newTodo = {
       id: v4(),
       text: inputContent,
       isCompleted: false,
     };
 
-    // Önceki todoları tutup yeni todo ekledik
-    setTodos((prev) => [...prev, newTodo]);
-    console.log(newTodo);
+    setTodos((prev) => {
+      const updatedTodos = [...prev, newTodo];
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
+      return updatedTodos;
+    });
 
-    // İnputun içeriğini sıfırla
     inputRef.current.value = "";
   };
 
-  useEffect(() => {
-    console.log(todos);
-  }, [todos]);
+  // Function that sets the completed status of todos
+  const changeCompleted = (id) => {
+    setTodos((prevTodos) => {
+      const updatedTodos = prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+      );
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
+      return updatedTodos;
+    });
+  };
+
+  // Function that deletes todos
+  const deleteTodo = (id) => {
+    setTodos((prevTodos) => {
+      const updatedTodos = prevTodos.filter((todo) => todo.id !== id);
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
+      return updatedTodos;
+    });
+  };
 
   return (
     <div className="bg-white place-self-center w-[450px] h-[600px] p-12 flex flex-col gap-5 rounded-lg">
@@ -61,7 +77,12 @@ const Todo = () => {
       {/* Todo Items Area */}
       <div className="px-2 mt-5 overflow-auto">
         {todos.map((todo) => (
-          <TodoItem todo={todo} />
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            changeCompleted={changeCompleted}
+            deleteTodo={deleteTodo}
+          />
         ))}
       </div>
     </div>
