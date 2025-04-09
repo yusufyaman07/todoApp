@@ -20,3 +20,7 @@ This project is a stylish Todo application developed using React and Tailwind CS
 - React
 
 - Tailwind CSS
+
+# 📧 Contact
+
+yusufyamanjob@gmail.com
